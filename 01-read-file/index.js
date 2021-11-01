@@ -5,7 +5,6 @@ const currentFile = path.join(__dirname, 'text.txt');
 let readStream = fs.createReadStream(currentFile, 'utf-8');
 
 readStream.on('data', (chank) => {
-    console.log(currentFile);
   console.log(chank);
 });
 
