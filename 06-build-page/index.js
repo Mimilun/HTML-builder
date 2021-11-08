@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs/promises');
 const fsStream = require('fs');
 const readLine = require('readline');
-const {log} = require('util');
+const {EOL} = require('os');
 
 const pathOutFile = path.join(__dirname, 'project-dist', 'style.css');
 const writeFile = fsStream.createWriteStream(pathOutFile);
@@ -11,16 +11,29 @@ const writeFile = fsStream.createWriteStream(pathOutFile);
 createDir(path.join(__dirname, 'project-dist'));
 
 // 2
-
+const writeIndex = fsStream.createWriteStream(path.join(__dirname, 'project-dist', 'index.html'));
 let rl = readLine.createInterface({
   input: fsStream.createReadStream(path.join(__dirname, 'template.html')),
-  // output: process.stdout
+  output: fsStream.createWriteStream(path.join(__dirname, 'project-dist', 'index.html'))
 });
+
 rl.on('line', (line) => {
-  let file = line.match(/{{(.+?)}}/);
-  if (file) {
-    console.log(file[1]);
-    console.log(getContentOfComponents(file[1]).then());
+  const fileMatch = line.match(/{{(.+?)}}/);
+  if (fileMatch) {
+    const pathComponents = path.join(__dirname, 'components');
+    fs.readdir(pathComponents).then((content) => {
+      content.forEach(file => {
+        if (file === fileMatch[1] + '.html') {
+          fsStream.createReadStream(path.join(pathComponents, file)).on('data', (chunk) => {
+            writeIndex.write(chunk);
+            writeIndex.write(EOL);
+          });
+        }
+      });
+    });
+  } else {
+    writeIndex.write('g');
+    writeIndex.write(EOL);
   }
 });
 
@@ -46,23 +59,6 @@ fsStream.readdir(path.join(__dirname, 'styles'), (err, content) => {
 // 4
 createDir(path.join(__dirname, 'project-dist', 'assets'));
 copyDir(path.join(__dirname, 'assets'), path.join(__dirname, 'project-dist', 'assets'));
-
-// functions
-
-async function getContentOfComponents(fileName) {
-  const pathComponents = path.join(__dirname, 'components');
-  let res = '';
-  fs.readdir(pathComponents).then((content) => {
-    content.forEach(file => {
-      if (file === fileName + '.html') {
-        fsStream.createReadStream(path.join(pathComponents, file)).on('data', chunk => {
-          res += chunk;
-        });
-      }
-    });
-  });
-  return res;
-}
 
 function copyDir(src, dest) {
   fs.readdir(src).then((content) => {
