@@ -24,7 +24,7 @@ rl.on('line', (line) => {
     fs.readdir(pathComponents).then((content) => {
       content.forEach(file => {
         if (file === fileMatch[1] + '.html') {
-          fsStream.createReadStream(path.join(pathComponents, file)).on('data', (chunk) => {
+          fsStream.createReadStream(path.join(pathComponents, file)).on('data', async (chunk) => {
             writeIndex.write(chunk);
             writeIndex.write(EOL);
           });
@@ -32,7 +32,7 @@ rl.on('line', (line) => {
       });
     });
   } else {
-    writeIndex.write('g');
+    writeIndex.write(line);
     writeIndex.write(EOL);
   }
 });
