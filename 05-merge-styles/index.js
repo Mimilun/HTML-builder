@@ -7,10 +7,14 @@ const writeFile = fs.createWriteStream(pathOutFile);
 fs.readdir(__dirname + '/styles', (err, content) => {
   content.forEach((file) => {
     if (path.extname(file) === '.css') {
-      let readFile = fs.createReadStream(__dirname + '/styles/' + file, 'utf-8');
+      fs.promises.stat(path.join(__dirname, 'styles', file)).then((stat) => {
+        if (stat.isFile()) {
+          let readFile = fs.createReadStream(__dirname + '/styles/' + file, 'utf-8');
 
-      readFile.on('data', (chunk) => {
-        writeFile.write(chunk);
+          readFile.on('data', (chunk) => {
+            writeFile.write(chunk);
+          });
+        }
       });
     }
   });
