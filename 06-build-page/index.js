@@ -1,8 +1,6 @@
 const path = require('path');
 const fs = require('fs/promises');
 const fsStream = require('fs');
-const readLine = require('readline');
-const {EOL} = require('os');
 
 const pathOutFile = path.join(__dirname, 'project-dist', 'style.css');
 const writeFile = fsStream.createWriteStream(pathOutFile);
@@ -11,30 +9,19 @@ const writeFile = fsStream.createWriteStream(pathOutFile);
 createDir(path.join(__dirname, 'project-dist'));
 
 // 2
-const writeIndex = fsStream.createWriteStream(path.join(__dirname, 'project-dist', 'index.html'));
-let rl = readLine.createInterface({
-  input: fsStream.createReadStream(path.join(__dirname, 'template.html')),
-  output: fsStream.createWriteStream(path.join(__dirname, 'project-dist', 'index.html'))
-});
 
-rl.on('line', (line) => {
-  const fileMatch = line.match(/{{(.+?)}}/);
-  if (fileMatch) {
-    const pathComponents = path.join(__dirname, 'components');
-    fs.readdir(pathComponents).then((content) => {
-      content.forEach(file => {
-        if (file === fileMatch[1] + '.html') {
-          fsStream.createReadStream(path.join(pathComponents, file)).on('data', async (chunk) => {
-            writeIndex.write(chunk);
-            writeIndex.write(EOL);
-          });
-        }
+fsStream.readFile(path.join(__dirname, 'template.html'), 'utf-8', (err, data) => {
+  let html = data.toString();
+  fs.readdir(path.join(__dirname, 'components')).then((files) =>
+    files.forEach(async (file) => {
+      let fileName = path.parse(file).name;
+      fs.readFile(path.join(__dirname, 'components', file), 'utf-8').then((data) => {
+        html = html.replace(`{{${fileName}}`, data);
+        fs.writeFile(path.join(__dirname, 'project-dist', 'index.html'), html);
       });
-    });
-  } else {
-    writeIndex.write(line);
-    writeIndex.write(EOL);
-  }
+    })
+  );
+
 });
 
 // 3
