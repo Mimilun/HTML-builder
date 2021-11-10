@@ -16,7 +16,7 @@ fsStream.readFile(path.join(__dirname, 'template.html'), 'utf-8', (err, data) =>
     files.forEach(async (file) => {
       let fileName = path.parse(file).name;
       fs.readFile(path.join(__dirname, 'components', file), 'utf-8').then((data) => {
-        html = html.replace(`{{${fileName}}`, data);
+        html = html.replace(`{{${fileName}}}`, data);
         fs.writeFile(path.join(__dirname, 'project-dist', 'index.html'), html);
       });
     })
