@@ -10,6 +10,7 @@ let rl = readLine.createInterface({
   output: process.stdout,
 });
 
+console.log('Enter text:');
 rl.on('line', (line) => {
   if (line === 'exit'.trim()) {
     writeableStream.end();
